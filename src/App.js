@@ -5,7 +5,7 @@ import UserList from "./components/users/userslist";
 function App() {
   const [usersList, setusersList] = useState([]);
 
-  const Adduserhandler = (ename, sdate, edate, stime, etime) => {
+  const addUserHandler = (ename, sdate, edate, stime, etime) => {
     setusersList((prevState) => {
       return [
         ...prevState,
@@ -20,11 +20,11 @@ function App() {
       ];
     });
   };
-
+  console.log(usersList);
   return (
     <>
-      <AddUser />
-      <UserList onAdduser={Adduserhandler} users={usersList} />
+  
+      <UserList />
     </>
   );
 }

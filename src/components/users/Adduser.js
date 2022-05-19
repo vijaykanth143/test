@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Card from "../ui/Card";
 import classes from "./Adduser.module.css";
 import Button from "../ui/Button";
@@ -7,28 +7,35 @@ import ReactDOM from "react-dom";
 import { v4 } from "uuid";
 import Wrapper from "../Helper/Wrapper";
 import { format } from "date-fns";
+
 import MaterialTable from "material-table";
+import UserList from "./userslist";
 
 const AddUser = (props) => {
   const [enteredEventName, setenteredEventName] = useState("");
-  const [enteredstartDate, setenteredstartDate] = useState();
-  const [enteredEndDate, setenteredEndDate] = useState();
+  const [enteredstartDate, setenteredstartDate] = useState("");
+  const [enteredEndDate, setenteredEndDate] = useState("");
   const [enteredstarttime, setenteredstarttime] = useState("");
   const [enteredendtime, setenteredendtime] = useState("");
   const [eventheld, setevent] = useState([]);
-  const [show, setshow] = useState(true);
-
+  const [enteredstatus, setstatus] = useState("");
   const [error, seterror] = useState();
-  console.log("dsfgerg", enteredstartDate);
-  useEffect(() => {}, [eventheld]);
+  console.log("data", props.data);
 
   const addUserHandler = (event) => {
     event.preventDefault();
-    if (enteredstartDate.length === 0 || enteredEventName.trim().length === 0) {
+    if (
+      enteredEventName.trim().length === 0 ||
+      enteredendtime.length === 0 ||
+      enteredstarttime.length === 0 ||
+      enteredstartDate.length === 0 ||
+      enteredEndDate.length === 0
+    ) {
       seterror({
         title: "Invalid input",
-        message: "Please enter a valid name and age (non-empty values)",
+        message: "Please enter  Valid inputs (non-empty values)",
       });
+
       return;
     }
     const eventinput = {
@@ -38,8 +45,8 @@ const AddUser = (props) => {
       enddate: enteredEndDate,
       starttime: enteredstarttime,
       endtime: enteredendtime,
+      eventstatus: enteredstatus,
     };
-    console.log(eventinput);
 
     const details = JSON.parse(localStorage.getItem("events") || "[]");
     details.push(eventinput);
@@ -51,13 +58,9 @@ const AddUser = (props) => {
     setenteredEndDate("");
     setenteredendtime("");
     setenteredEventName("");
-    setshow(false);
-    console.log("evnt", eventheld);
-
 
     window.location.reload();
   };
-  console.log(show);
   const eventChangeHandler = (event) => {
     setenteredEventName(event.target.value);
   };
@@ -73,11 +76,37 @@ const AddUser = (props) => {
   const endtimeChangeHandler = (event) => {
     setenteredendtime(event.target.value);
   };
+  useEffect(() => {
+    if (
+      moment(new Date(enteredstartDate)).format("YYYY-MM-DD") <=
+        moment(new Date()).format("YYYY-MM-DD") &&
+      moment(new Date(enteredEndDate)).format("YYYY-MM-DD") >=
+        moment(new Date()).format("YYYY-MM-DD")
+    ) {
+      setstatus("Inprogress");
+    } else if (new Date(enteredstartDate) > new Date(enteredEndDate)) {
+      setenteredEndDate(enteredstartDate);
+    } else if (
+      moment(new Date(enteredstartDate)).format("YYYY-MM-DD") <
+        moment(new Date()).format("YYYY-MM-DD") &&
+      moment(new Date(enteredEndDate)).format("YYYY-MM-DD") <
+        moment(new Date()).format("YYYY-MM-DD")
+    ) {
+      setstatus("Event Completed");
+    } else if (
+      moment(new Date(enteredstartDate)).format("YYYY-MM-DD") >
+        moment(new Date()).format("YYYY-MM-DD") &&
+      moment(new Date(enteredEndDate)).format("YYYY-MM-DD") >
+        moment(new Date()).format("YYYY-MM-DD")
+    ) {
+      setstatus("Upcoming Event");
+    }
+  }, [enteredstartDate, enteredEndDate]);
 
   const Errorhandler = () => {
     seterror(null);
   };
-
+  console.log("status", enteredstatus);
   return (
     <Wrapper>
       {error && (
@@ -95,6 +124,7 @@ const AddUser = (props) => {
             id="eventname"
             type="text"
             name="enteredEventName"
+            className="form-control"
             value={enteredEventName}
             onChange={eventChangeHandler}
           />
@@ -102,6 +132,7 @@ const AddUser = (props) => {
           <input
             id="startDate"
             type="date"
+            className="form-control"
             name="enteredstartDate"
             value={enteredstartDate}
             onChange={startdateChangeHandler}
@@ -111,6 +142,7 @@ const AddUser = (props) => {
             id="endDate"
             type="date"
             name="enteredEndDate"
+            className="form-control"
             min={enteredstartDate}
             value={enteredEndDate}
             onChange={enddateChangeHandler}
@@ -120,6 +152,7 @@ const AddUser = (props) => {
           <input
             id="starttime"
             type="time"
+            className="form-control"
             name="enteredstarttime"
             value={enteredstarttime}
             onChange={starttimeChangeHandler}
@@ -130,6 +163,7 @@ const AddUser = (props) => {
             type="time"
             name="enteredendtime"
             min={enteredstarttime}
+            className="form-control"
             value={enteredendtime}
             onChange={endtimeChangeHandler}
           />
